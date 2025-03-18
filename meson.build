@@ -8,6 +8,8 @@ project('pldm', ['c', 'cpp'],
           'buildtype=debugoptimized'
         ])
 
+add_project_arguments('-Wno-unused-parameter', language: 'cpp')
+
 # Wno-psabi reduces the number of "Note:" messages when cross-compiling some STL
 # stuff for ARM. See https://stackoverflow.com/questions/48149323/strange-gcc-warning-when-compiling-qt-project
 # Basically, gcc 6 and gcc 7 are not ABI compatible, but since the whole OpenBMC
@@ -130,12 +132,15 @@ endif
 
 libpldm_dep = dependency('libpldm', fallback:['libpldm','libpldm_dep'], include_type: 'system')
 
+libmctp_proj = subproject('libmctp', default_options: ['fileio=enabled', 'nolog=false'])
+libmctp_dep = libmctp_proj.get_variable('libmctp_dep')
 
 libpldmutils_headers = ['.']
 libpldmutils = library(
   'pldmutils',
   'common/transport.cpp',
   'common/utils.cpp',
+  'common/mctp.cpp',
   version: meson.project_version(),
   dependencies: [
       libpldm_dep,
@@ -143,6 +148,7 @@ libpldmutils = library(
       phosphor_logging_dep,
       nlohmann_json_dep,
       sdbusplus,
+      libmctp_dep,
   ],
   install: true,
   include_directories: include_directories(libpldmutils_headers),
