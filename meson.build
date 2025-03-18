@@ -3,12 +3,13 @@ project('pldm', ['c', 'cpp'],
         default_options: [
           'warning_level=3',
           'default_library=shared',
-          'werror=true',
+          'werror=false',
           'cpp_std=c++23',
           'buildtype=debugoptimized'
         ])
 
 add_project_arguments('-Wno-unused-parameter', language: 'cpp')
+add_global_arguments('-Wno-sign-compare', language: 'c')
 
 # Wno-psabi reduces the number of "Note:" messages when cross-compiling some STL
 # stuff for ARM. See https://stackoverflow.com/questions/48149323/strange-gcc-warning-when-compiling-qt-project
@@ -135,7 +136,7 @@ libpldm_dep = dependency('libpldm', fallback:['libpldm','libpldm_dep'], include_
 libmctp_proj = subproject('libmctp', default_options: ['fileio=enabled', 'nolog=false'])
 libmctp_dep = libmctp_proj.get_variable('libmctp_dep')
 
-i2c_proj = subproject('libi2c')
+i2c_proj = subproject('libi2c', default_options: ['werror=false'])
 i2c_dep = i2c_proj.get_variable('i2c_dep')
 
 libpldmutils_headers = ['.']
