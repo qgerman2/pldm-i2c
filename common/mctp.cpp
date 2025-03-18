@@ -56,14 +56,14 @@ namespace MCTP {
         ssize_t payload_bytes = rx_buffer[2];
         printf("%d payload bytes\n", payload_bytes);
 
-        rx_bytes = i2c_ioctl_read(&device, 0x0, &rx_buffer[3], payload_bytes + 3);
+        rx_bytes = i2c_ioctl_read(&device, 0x0, rx_buffer, payload_bytes + 3);
         printf("%d readed bytes\n", rx_bytes);
 
         i2c_close(bus);
 
-	*rx_buf = malloc(payload_bytes);
-        memcpy(*rx_buf, &rx_buffer[3], payload_bytes);
-        *rx_len = payload_bytes;
+        *rx_buf = malloc(payload_bytes - 6);
+        memcpy(*rx_buf, &rx_buffer[3 + 6], payload_bytes - 6);
+        *rx_len = payload_bytes - 6;
     }
 }
 
