@@ -160,6 +160,6 @@ pldm_requester_rc_t PldmTransport::sendRecvMsg(pldm_tid_t tid, const void* tx,
                                                size_t& rxLen)
 {
     //return pldm_transport_send_recv_msg(transport, tid, tx, txLen, &rx, &rxLen);
-    MCTP::send(tid, reinterpret_cast<const uint8_t*>(tx), txLen);
-    return pldm_requester_rc_t::PLDM_REQUESTER_SEND_FAIL;
+    MCTP::send(tid, reinterpret_cast<const uint8_t*>(tx), txLen, &rx, &rxLen);
+    return pldm_requester_rc_t::PLDM_REQUESTER_SUCCESS;
 }
