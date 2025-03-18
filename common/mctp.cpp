@@ -54,33 +54,34 @@ static void MCTP::rx(uint8_t src_eid, bool tag_owner, uint8_t msg_tag,
 }
 
 static int MCTP::tx(const void *buf, size_t len, void *ctx) {
-    auto data = reinterpret_cast<const uint8_t *>(buf);
-
-    int bus;
-    if ((bus = i2c_open("/dev/i2c-1")) == -1) {
-
-        printf("libi2c error\n");
+    int bus = i2c_open("/dev/i2c-1");
+    if (bus == -1) {
+        printf("bus error\n");
+        return -1;
     }
 
-    printf("antes   ");
-    for (size_t i = 0; i < len; i++) {
-        printf("%d ", data[i]);
-    }
-    std::vector<uint8_t> miau(len);
-    memcpy(miau.data(), data, len);
-    auto hdr = reinterpret_cast<struct mctp_i2c_hdr *>(miau.data());
-    hdr->dest = i2c->own_addr << 1;
-    hdr->source = ((i2c->own_addr + 1) << 1) + 1;
-    miau.data()[5] = 80;
-    miau.data()[6] = 81;
+    I2CDevice device;
+    memset(&device, 0, sizeof(device));
 
-    printf("\ndespues ");
-    for (size_t i = 0; i < len; i++) {
-        printf("%d ", miau.data()[i]);
-    }
-    printf(" tx\n");
+    device.bus = bus;
+    device.addr = 0x12;
+    device.iaddr_bytes = 0;
+    device.page_bytes = 16;
 
-    mctp_i2c_rx(i2c, miau.data(), len);
+    ssize_t tx_bytes = i2c_ioctl_write(&device, 0x0, buf, len);
+    if (tx_bytes < (ssize_t)len) {
+        printf("tx error\n");
+        return -1;
+    }
+
+    uint8_t rx_buffer[300];
+    ssize_t rx_bytes = i2c_ioctl_read(&device, 0x0, rx_buffer, 10);
+    if (rx_bytes < 10) {
+        printf("rx error\n");
+        return -1;
+    }
+
+    i2c_close(bus);
 
     return 0;
 }
