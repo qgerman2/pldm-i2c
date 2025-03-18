@@ -135,6 +135,9 @@ libpldm_dep = dependency('libpldm', fallback:['libpldm','libpldm_dep'], include_
 libmctp_proj = subproject('libmctp', default_options: ['fileio=enabled', 'nolog=false'])
 libmctp_dep = libmctp_proj.get_variable('libmctp_dep')
 
+i2c_proj = subproject('libi2c')
+i2c_dep = i2c_proj.get_variable('i2c_dep')
+
 libpldmutils_headers = ['.']
 libpldmutils = library(
   'pldmutils',
@@ -149,6 +152,7 @@ libpldmutils = library(
       nlohmann_json_dep,
       sdbusplus,
       libmctp_dep,
+      i2c_dep,
   ],
   install: true,
   include_directories: include_directories(libpldmutils_headers),
